@@ -28,7 +28,7 @@ jobs:
     - name: Build and push backend
       uses: docker/build-push-action@v4
       with:
-        context: ./ai-trading-system
+        context: .
         push: true
         tags: |
           ${{ env.DOCKERHUB_USERNAME }}/${{ env.BACKEND_IMAGE }}:latest
@@ -37,7 +37,7 @@ jobs:
     - name: Build and push frontend
       uses: docker/build-push-action@v4
       with:
-        context: ./ai-trading-system/web/frontend
+        context: ./web/frontend
         push: true
         tags: |
           ${{ env.DOCKERHUB_USERNAME }}/${{ env.FRONTEND_IMAGE }}:latest

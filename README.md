@@ -46,7 +46,7 @@
 ## 🏗️ Mimari
 
 ```
-ai-trading-system/
+AI-Trading-Bot/
 ├── agent/                  # RL agent ve TradingAgents LLM
 ├── backtesting/           # Backtest motorları
 ├── broker/                # Broker entegrasyonları (Binance, MT5)
@@ -72,8 +72,8 @@ ai-trading-system/
 
 ### 1. Projeyi Klonla
 ```bash
-git clone https://github.com/kullanici-adi/ai-trading-system.git
-cd ai-trading-system
+git clone https://github.com/agunes77/AI-Trading-Bot.git
+cd AI-Trading-Bot
 ```
 
 ### 2. Python Bağımlılıkları
