@@ -105,6 +105,10 @@ cd web/frontend
 npm run dev
 ```
 
+Uygulama adresleri:
+- Frontend: http://localhost:8080
+- Backend API: http://localhost:8000
+
 ## 🐳 Docker ile Kurulum
 
 ```bash
