@@ -2,9 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: agunes77/ai-trading-backend:latest
     container_name: ai-trading-backend
     restart: unless-stopped
     ports:
@@ -32,9 +30,7 @@ services:
       - trading-network
 
   frontend:
-    build:
-      context: ./web/frontend
-      dockerfile: Dockerfile
+    image: agunes77/ai-trading-frontend:latest
     container_name: ai-trading-frontend
     restart: unless-stopped
     ports:
