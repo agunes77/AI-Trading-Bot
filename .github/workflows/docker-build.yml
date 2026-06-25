@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  DOCKERHUB_USERNAME: agunes77
+  DOCKERHUB_USERNAME: agunesxt111
   BACKEND_IMAGE: ai-trading-backend
   FRONTEND_IMAGE: ai-trading-frontend
 
