@@ -1,4 +1,5 @@
 import pandas as pd
+from typing import Dict, Any
 from strategy_builder.solvers.base_solver import BaseSolver
 
 
