@@ -13,6 +13,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
 from strategy_builder.node_definitions import get_node_categories
 from strategy_builder.storage import save_strategy, load_strategy, list_strategies, delete_strategy
 from strategy_builder.executor import StrategyExecutor
+from trade_management.backtest_engine import BacktestEngine
 
 router = APIRouter()
 
@@ -250,6 +251,66 @@ async def run_saved_strategy(strategy_id: str, request: StrategyRunRequest):
         
         if "error" in result:
             raise HTTPException(status_code=400, detail=result["error"])
+        
+        return result
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class AdvancedBacktestRequest(BaseModel):
+    nodes: List[Dict] = []
+    edges: List[Dict] = []
+    source: str = "crypto"
+    symbol: str = "BTC/USDT"
+    timeframe: str = "1h"
+    days: int = 365
+    risk_pct: float = 0.02
+    sl_atr_mult: float = 1.5
+    tp_atr_mult: float = 3.0
+    trailing_mode: str = "atr"
+    trailing_atr_mult: float = 2.0
+
+
+@router.post("/advanced-backtest")
+async def run_advanced_backtest(request: AdvancedBacktestRequest):
+    """OCO Emir Setleri + Trailing Stops ile gelişmiş BlackBird backtest"""
+    try:
+        from data.data_manager import DataManager
+        
+        dm = DataManager()
+        if request.source == "crypto":
+            df = dm.get_crypto_data(request.symbol, request.timeframe, request.days)
+        else:
+            df = dm.get_forex_data(request.symbol, request.timeframe, request.days)
+        
+        if df.empty:
+            raise HTTPException(status_code=400, detail="Veri bulunamadi")
+        
+        strategy = {"nodes": request.nodes, "edges": request.edges}
+        
+        bt_engine = BacktestEngine(
+            initial_balance=10000.0,
+            commission=0.001
+        )
+        
+        result = bt_engine.run(
+            strategy=strategy,
+            data=df,
+            risk_pct=request.risk_pct,
+            sl_atr_mult=request.sl_atr_mult,
+            tp_atr_mult=request.tp_atr_mult,
+            trailing_mode=request.trailing_mode,
+            trailing_atr_mult=request.trailing_atr_mult,
+        )
+        
+        if "error" in result:
+            raise HTTPException(status_code=400, detail=result["error"])
+        
+        result.pop("trades", None)
+        result.pop("equity_curve", None)
         
         return result
         
