@@ -53,9 +53,7 @@ models/
 data_cache/
 *.parquet
 *.csv
-*.json
-!package.json
-!tsconfig.json
+data_cache/*.json
 
 # Node modules
 node_modules/
