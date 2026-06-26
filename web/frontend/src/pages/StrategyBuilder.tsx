@@ -18,6 +18,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import Editor from '@monaco-editor/react';
 import { strategyBuilderApi } from '../services/api';
+import SignalChart from '../components/SignalChart';
 import {
   Save, Play, FolderOpen, Trash2, Plus, Activity, TrendingUp,
   BarChart2, GitMerge, Sliders, ArrowUp, ArrowDown, ShoppingCart,
@@ -624,7 +625,7 @@ export default function StrategyBuilder() {
 
         {/* Sonuç Paneli */}
         {result && (
-          <div style={{ background: 'var(--bg-card)', borderRadius: 12, padding: '1rem', maxHeight: 250, overflowY: 'auto' }}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: 12, padding: '1rem', maxHeight: 600, overflowY: 'auto' }}>
             <h3 style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.75rem' }}>
               Backtest Sonuçları {result.name && `— ${result.name}`}
             </h3>
@@ -632,50 +633,67 @@ export default function StrategyBuilder() {
               <div style={{ color: 'var(--accent-red)', padding: '0.5rem' }}>
                 Hata: {result.error}
               </div>
-            ) : result.performance ? (
-              <div className="grid-4">
-                <div>
-                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Toplam Getiri</div>
-                  <div className={result.performance.total_return_pct >= 0 ? 'text-green' : 'text-red'} style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                    {result.performance.total_return_pct.toFixed(2)}%
+            ) : (
+              <>
+                {result.performance && (
+                  <div className="grid-4" style={{ marginBottom: '1rem' }}>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Toplam Getiri</div>
+                      <div className={result.performance.total_return_pct >= 0 ? 'text-green' : 'text-red'} style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+                        {result.performance.total_return_pct.toFixed(2)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Max Drawdown</div>
+                      <div className="text-red" style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+                        {result.performance.max_drawdown_pct.toFixed(2)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Sharpe Ratio</div>
+                      <div className="text-blue" style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+                        {result.performance.sharpe_ratio.toFixed(3)}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Kazanma Oranı</div>
+                      <div className="text-yellow" style={{ fontSize: '1.25rem', fontWeight: 700 }}>
+                        {result.performance.win_rate.toFixed(1)}%
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Toplam İşlem</div>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{result.performance.total_trades}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Kazanan</div>
+                      <div className="text-green" style={{ fontSize: '1.25rem', fontWeight: 700 }}>{result.performance.winning_trades}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Kaybeden</div>
+                      <div className="text-red" style={{ fontSize: '1.25rem', fontWeight: 700 }}>{result.performance.losing_trades}</div>
+                    </div>
+                    <div>
+                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>Son Bakiye</div>
+                      <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>${result.performance.final_equity?.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
+                    </div>
                   </div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Max Drawdown</div>
-                  <div className="text-red" style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                    {result.performance.max_drawdown_pct.toFixed(2)}%
+                )}
+
+                {result.chart_data && result.chart_data.candles && result.chart_data.candles.length > 0 && (
+                  <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                      📈 Sinyal Grafiği — Mum + BUY/SELL İşaretleri
+                    </h4>
+                    <SignalChart
+                      candles={result.chart_data.candles}
+                      buyMarkers={result.chart_data.buy_markers || []}
+                      sellMarkers={result.chart_data.sell_markers || []}
+                    />
                   </div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Sharpe Ratio</div>
-                  <div className="text-blue" style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                    {result.performance.sharpe_ratio.toFixed(3)}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Kazanma Oranı</div>
-                  <div className="text-yellow" style={{ fontSize: '1.25rem', fontWeight: 700 }}>
-                    {result.performance.win_rate.toFixed(1)}%
-                  </div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Toplam İşlem</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{result.performance.total_trades}</div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Kazanan</div>
-                  <div className="text-green" style={{ fontSize: '1.25rem', fontWeight: 700 }}>{result.performance.winning_trades}</div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Kaybeden</div>
-                  <div className="text-red" style={{ fontSize: '1.25rem', fontWeight: 700 }}>{result.performance.losing_trades}</div>
-                </div>
-                <div>
-                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>Son Bakiye</div>
-                  <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>${result.performance.final_equity?.toLocaleString('en-US', { minimumFractionDigits: 2 })}</div>
-                </div>
-              </div>
-            ) : null}
+                )}
+              </>
+            )}
           </div>
         )}
       </div>

@@ -40,6 +40,7 @@ class PineScriptRunner:
             buy_signals, sell_signals = self._generate_signals(df, parsed)
             
             performance = self._calculate_performance(buy_signals, sell_signals, df)
+            chart_data = self._build_chart_data(buy_signals, sell_signals, df)
             
             return {
                 'success': True,
@@ -49,6 +50,7 @@ class PineScriptRunner:
                 'buy_signals': buy_signals.sum(),
                 'sell_signals': sell_signals.sum(),
                 'performance': performance,
+                'chart_data': chart_data,
                 'python_code': parsed.get('python_code', ''),
             }
             
@@ -140,6 +142,54 @@ class PineScriptRunner:
                 logger.warning(f"Koşul hesaplama hatası: {cond} - {e}")
         
         return buy_signals, sell_signals
+    
+    def _build_chart_data(self, buy_signals: pd.Series, sell_signals: pd.Series, 
+                          data: pd.DataFrame) -> Dict[str, Any]:
+        """Grafik verisi ve sinyal noktalarını oluştur"""
+        candles = []
+        buy_markers = []
+        sell_markers = []
+        
+        for i in range(len(data)):
+            row = data.iloc[i]
+            ts = row.name if hasattr(row.name, 'isoformat') else str(row.name)
+            if hasattr(ts, 'isoformat'):
+                ts = ts.isoformat()
+            
+            candle = {
+                "timestamp": ts,
+                "open": float(row["open"]),
+                "high": float(row["high"]),
+                "low": float(row["low"]),
+                "close": float(row["close"]),
+                "volume": float(row["volume"]),
+            }
+            candles.append(candle)
+            
+            if bool(buy_signals.iloc[i]):
+                buy_markers.append({
+                    "timestamp": ts,
+                    "price": float(row["low"]) * 0.998,
+                    "index": i,
+                    "type": "buy",
+                })
+            
+            if bool(sell_signals.iloc[i]):
+                sell_markers.append({
+                    "timestamp": ts,
+                    "price": float(row["high"]) * 1.002,
+                    "index": i,
+                    "type": "sell",
+                })
+        
+        return {
+            "candles": candles,
+            "buy_markers": buy_markers,
+            "sell_markers": sell_markers,
+            "total_candles": len(candles),
+            "buy_count": len(buy_markers),
+            "sell_count": len(sell_markers),
+        }
     
     def _calculate_performance(self, buy_signals: pd.Series, sell_signals: pd.Series, 
                                data: pd.DataFrame) -> Dict[str, Any]:

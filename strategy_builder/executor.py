@@ -46,11 +46,13 @@ class StrategyExecutor:
             
             signals = self._generate_signals(nodes, edges)
             performance = self._calculate_performance(signals, data)
+            chart_data = self._build_chart_data(signals, data)
             
             return {
                 "success": True,
                 "signals": signals,
                 "performance": performance,
+                "chart_data": chart_data,
                 "node_count": len(nodes),
             }
             
@@ -265,6 +267,61 @@ class StrategyExecutor:
                     signals["sell"] = self.node_outputs[node_id]
         
         return signals
+    
+    def _build_chart_data(self, signals: Dict[str, pd.Series], data: pd.DataFrame) -> Dict[str, Any]:
+        """Grafik verisi ve sinyal noktalarını oluştur"""
+        buy_signals = signals.get("buy", pd.Series(False))
+        sell_signals = signals.get("sell", pd.Series(False))
+        
+        if len(buy_signals) != len(data):
+            buy_signals = pd.Series(False, index=data.index)
+        if len(sell_signals) != len(data):
+            sell_signals = pd.Series(False, index=data.index)
+        
+        candles = []
+        buy_markers = []
+        sell_markers = []
+        
+        for i in range(len(data)):
+            row = data.iloc[i]
+            ts = row.name if hasattr(row.name, 'isoformat') else str(row.name)
+            if hasattr(ts, 'isoformat'):
+                ts = ts.isoformat()
+            
+            candle = {
+                "timestamp": ts,
+                "open": float(row["open"]),
+                "high": float(row["high"]),
+                "low": float(row["low"]),
+                "close": float(row["close"]),
+                "volume": float(row["volume"]),
+            }
+            candles.append(candle)
+            
+            if bool(buy_signals.iloc[i]):
+                buy_markers.append({
+                    "timestamp": ts,
+                    "price": float(row["low"]) * 0.998,
+                    "index": i,
+                    "type": "buy",
+                })
+            
+            if bool(sell_signals.iloc[i]):
+                sell_markers.append({
+                    "timestamp": ts,
+                    "price": float(row["high"]) * 1.002,
+                    "index": i,
+                    "type": "sell",
+                })
+        
+        return {
+            "candles": candles,
+            "buy_markers": buy_markers,
+            "sell_markers": sell_markers,
+            "total_candles": len(candles),
+            "buy_count": len(buy_markers),
+            "sell_count": len(sell_markers),
+        }
     
     def _calculate_performance(self, signals: Dict[str, pd.Series], data: pd.DataFrame) -> Dict[str, Any]:
         """Strateji performansını hesapla"""
