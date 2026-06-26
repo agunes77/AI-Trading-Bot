@@ -1,8 +1,6 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: agunesxt111/ai-trading-backend:latest
     container_name: ai-trading-app
     restart: unless-stopped
     ports:
