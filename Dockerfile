@@ -15,6 +15,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
+COPY web/backend/requirements.txt /tmp/web-requirements.txt
+RUN pip install --no-cache-dir -r /tmp/web-requirements.txt
+
 COPY . .
 
 RUN mkdir -p models logs data_cache

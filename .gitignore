@@ -55,7 +55,11 @@ data_cache/
 *.csv
 *.json
 !package.json
+!package-lock.json
 !tsconfig.json
+!tsconfig.app.json
+!tsconfig.node.json
+!vite.config.ts
 
 # Node modules
 node_modules/
