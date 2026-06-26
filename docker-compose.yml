@@ -1,8 +1,8 @@
-version: '3.8'
-
 services:
   backend:
-    image: agunes77/ai-trading-backend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: ai-trading-backend
     restart: unless-stopped
     ports:
@@ -17,29 +17,29 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
       - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
     volumes:
-      - ./models:/app/models
-      - ./logs:/app/logs
-      - ./data_cache:/app/data_cache
+      - ai-models:/app/models
+      - ai-logs:/app/logs
+      - ai-data:/app/data_cache
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-    networks:
-      - trading-network
 
   frontend:
-    image: agunes77/ai-trading-frontend:latest
+    build:
+      context: ./web/frontend
+      dockerfile: Dockerfile
     container_name: ai-trading-frontend
     restart: unless-stopped
     ports:
       - "8080:80"
     depends_on:
       - backend
-    networks:
-      - trading-network
 
-networks:
-  trading-network:
-    driver: bridge
+volumes:
+  ai-models:
+  ai-logs:
+  ai-data:
