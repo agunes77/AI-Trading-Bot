@@ -9,6 +9,7 @@ import AI from './pages/AI';
 import DataManagement from './pages/DataManagement';
 import TradingAgentsPage from './pages/TradingAgents';
 import StrategyBuilder from './pages/StrategyBuilder';
+import PineScriptEditor from './pages/PineScriptEditor';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="chart" element={<Chart />} />
           <Route path="strategies" element={<Strategies />} />
           <Route path="builder" element={<StrategyBuilder />} />
+          <Route path="pine-script" element={<PineScriptEditor />} />
           <Route path="data" element={<DataManagement />} />
           <Route path="trading-agents" element={<TradingAgentsPage />} />
           <Route path="trades" element={<Trades />} />
